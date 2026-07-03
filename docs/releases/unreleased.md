@@ -123,6 +123,9 @@
 ## stats
 
 - Added `stats.ChiSquared`, a streaming Chi-squared statistic between two categorical variables. Wrap it with `utils.Rolling` for a rolling version.
+- `river.stats` is now fully statically typed (mypy strict). The base classes are generic: `Univariate[T, R]` and `Statistic[R]` with `float` defaults, so existing annotations like `stats.base.Univariate` keep working unchanged. Categorical statistics get honest types, e.g. `stats.Mode` is generic over its observed values and `stats.Entropy` accepts any hashable value. Type stubs were added for the Rust-backed statistics.
+- Behavior change: `get()` now raises `stats.base.NotEnoughSamples` instead of returning `None` when a statistic hasn't seen enough values to produce one. This affects `Shift`, `SEM`, `Quantile`, `RollingQuantile`, `IQR`, `RollingIQR`, `Mode`, and `RollingMode`. Statistics piped with the `|` operator handle this automatically, and consumers such as `preprocessing.StatImputer` and `feature_extraction.Agg` behave as before.
+- Fixed `repr()` crashing on statistics holding non-numeric values, e.g. a `stats.Mode` over strings.
 
 ## tree
 

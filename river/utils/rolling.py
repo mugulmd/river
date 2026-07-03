@@ -30,7 +30,7 @@ class BaseRolling(Generic[_T]):
     def __init__(self, obj: _T) -> None:
         self.obj = obj
 
-    def __getattr__(self, name: str) -> object:
+    def __getattr__(self, name: str) -> Any:
         # Only called when normal attribute lookup fails, so the fast path
         # (self.obj, self.window, etc.) never enters this method.
         # Guard against recursion during deepcopy/pickle when obj is not yet set.

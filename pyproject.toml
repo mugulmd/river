@@ -10,6 +10,7 @@ dependencies = [
     "scipy>=1.14.1,<2",
     "numpy>=2.2.5,<3",
     "narwhals>=2.0.0",
+    "typing-extensions>=4.4",
 ]
 
 [project.optional-dependencies]
@@ -35,6 +36,7 @@ include = [
     { path = "river/datasets/*.zip", format = ["sdist", "wheel"] },
     { path = "river/drift/datasets/*.csv", format = ["sdist", "wheel"] },
     { path = "river/stream/*.zip", format = ["sdist", "wheel"] },
+    { path = "river/_river_rust/*.pyi", format = ["sdist", "wheel"] },
 ]
 
 [dependency-groups]
@@ -222,8 +224,10 @@ module = [
     "polars.*",
     "pyarrow",
     "pyarrow.*",
-    "river._river_rust",
-    "river._river_rust.*",
+    "river._river_rust.drift",
+    "river._river_rust.tree",
+    "river._river_rust.vectordict",
+    "river._river_rust.feature_hashing",
 ]
 ignore_missing_imports = true
 
@@ -239,7 +243,6 @@ ignore_missing_imports = true
 # Disable strict mode for all non fully-typed modules
 module = [
     "river.metrics.*",
-    "river.stats.*",
     "river.optim.*",
     "river.datasets.*",
     "river.tree.*",

@@ -61,27 +61,17 @@ class Quantile(stats.base.Univariate):
         self._is_updated = False
         self.q = q  # Used by anomaly.QuantileFilter
 
-    def update(self, x):
+    def update(self, x: float) -> None:
         self._quantile.update(x)
         if not self._is_updated:
             self._is_updated = True
 
-    def get(self):
-        # HACK: Avoid this following error in `QuantileFilter`
-        # panicked at 'index out of bounds: the len is 0 but the index is 0'
+    def get(self) -> float:
+        # Guard against calling into the Rust side before the first update, which panics with
+        # 'index out of bounds: the len is 0 but the index is 0'.
         if not self._is_updated:
-            return None
+            raise stats.base.NotEnoughSamples(f"{self.name} hasn't seen any value")
         return self._quantile.get()
-
-    def __repr__(self):
-        # We surcharge this method to avoid this error on rust side:
-        # pyo3_runtime.PanicException: index out of bounds: the len is 0 but the index is 0
-        # This error is caused by the `get()` use before the update in the super method.
-        value = None
-        if self._is_updated:
-            value = self.get()
-        fmt_value = None if value is None else f"{value:{self._fmt}}".rstrip("0")
-        return f"{self.__class__.__name__}: {fmt_value}"
 
 
 class RollingQuantile(stats.base.RollingUnivariate):
@@ -137,26 +127,18 @@ class RollingQuantile(stats.base.RollingUnivariate):
         self.window_size_value = window_size
         self._is_updated = False
 
-    def update(self, x) -> None:
+    def update(self, x: float) -> None:
         self._rolling_quantile.update(x)
         if not self._is_updated:
             self._is_updated = True
 
-    def get(self) -> float | None:
+    def get(self) -> float:
+        # Guard against calling into the Rust side before the first update, which panics with
+        # 'attempt to subtract with overflow'.
         if not self._is_updated:
-            return None
+            raise stats.base.NotEnoughSamples(f"{self.name} hasn't seen any value")
         return self._rolling_quantile.get()
 
     @property
-    def window_size(self):
+    def window_size(self) -> int:
         return self.window_size_value
-
-    def __repr__(self):
-        # We surcharge this method to avoid this error on rust side:
-        # pyo3_runtime.PanicException: attempt to subtract with overflow
-        # This error is caused by the `get()` use before the update in the super method.
-        value = None
-        if self._is_updated:
-            value = self.get()
-        fmt_value = None if value is None else f"{value:{self._fmt}}".rstrip("0")
-        return f"{self.__class__.__name__}: {fmt_value}"

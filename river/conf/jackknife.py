@@ -164,7 +164,13 @@ class RegressionJackknife(base.Wrapper[T], base.Regressor):
         if not with_interval:
             return y_pred
 
+        def get_or_zero(stat: stats.base.Univariate) -> float:
+            try:
+                return stat.get()
+            except stats.base.NotEnoughSamples:
+                return 0.0
+
         return interval.Interval(
-            lower=y_pred + (self._lower.get() or 0),
-            upper=y_pred + (self._upper.get() or 0),
+            lower=y_pred + get_or_zero(self._lower),
+            upper=y_pred + get_or_zero(self._upper),
         )

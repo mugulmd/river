@@ -220,7 +220,10 @@ class StatImputer(base.Transformer):
 
         for i in self.stats:
             if x[i] is None:
-                x[i] = self.stats[i].get()
+                try:
+                    x[i] = self.stats[i].get()
+                except stats.base.NotEnoughSamples:
+                    pass
 
         return x
 

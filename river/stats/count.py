@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import typing
+
 from river import stats
 
 
@@ -13,11 +15,11 @@ class Count(stats.base.Univariate):
 
     """
 
-    def __init__(self):
-        self.n = 0
+    def __init__(self) -> None:
+        self.n: int = 0
 
-    def update(self, x=None):
+    def update(self, x: typing.Any = None) -> None:
         self.n += 1
 
-    def get(self):
+    def get(self) -> float:
         return self.n

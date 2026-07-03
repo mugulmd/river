@@ -708,11 +708,16 @@ class RobustScaler(base.Transformer):
         for i, xi in x.items():
             x_tf[i] = xi
             if self.with_centering:
-                median = self.median[i].get()
-                if median is not None:
-                    x_tf[i] -= median
+                try:
+                    x_tf[i] -= self.median[i].get()
+                except stats.base.NotEnoughSamples:
+                    pass
             if self.with_scaling:
-                x_tf[i] = safe_div(x_tf[i], self.iqr[i].get())
+                try:
+                    iqr = self.iqr[i].get()
+                except stats.base.NotEnoughSamples:
+                    iqr = None
+                x_tf[i] = safe_div(x_tf[i], iqr)
 
         return x_tf
 

@@ -26,20 +26,20 @@ class PeakToPeak(stats.base.Univariate):
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._ptp = _rust_stats.RsPeakToPeak()
         self._is_updated = False
 
     @property
-    def name(self):
+    def name(self) -> str:
         return "ptp"
 
-    def update(self, x):
+    def update(self, x: float) -> None:
         self._ptp.update(x)
         if not self._is_updated:
             self._is_updated = True
 
-    def get(self):
+    def get(self) -> float:
         if not self._is_updated:
             return 0.0
         return self._ptp.get()
@@ -84,18 +84,12 @@ class RollingPeakToPeak(stats.base.RollingUnivariate):
         self.min = stats.RollingMin(window_size)
 
     @property
-    def window_size(self):
+    def window_size(self) -> int:
         return self.max.window_size
 
-    def update(self, x):
+    def update(self, x: float) -> None:
         self.max.update(x)
         self.min.update(x)
 
-    def get(self):
-        maximum = self.max.get()
-        if maximum is None:
-            return None
-        minimum = self.min.get()
-        if minimum is None:
-            return None
-        return maximum - minimum
+    def get(self) -> float:
+        return self.max.get() - self.min.get()

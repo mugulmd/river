@@ -8,7 +8,7 @@ import scipy.stats
 from river import stats, utils
 
 
-def test_chi_squared_basic():
+def test_chi_squared_basic() -> None:
     chi2 = stats.ChiSquared()
 
     data = [
@@ -26,7 +26,7 @@ def test_chi_squared_basic():
     assert math.isclose(chi2.p_value, 0.04550026389635842)
 
 
-def test_chi_squared_zero_case():
+def test_chi_squared_zero_case() -> None:
     chi2 = stats.ChiSquared()
 
     # No dependency: all belong to the same y value
@@ -44,7 +44,7 @@ def test_chi_squared_zero_case():
     assert chi2.p_value == 1.0
 
 
-def test_chi_squared_exact_value():
+def test_chi_squared_exact_value() -> None:
     chi2 = stats.ChiSquared()
 
     data = [
@@ -60,7 +60,7 @@ def test_chi_squared_exact_value():
     assert math.isclose(chi2.get(), 4.0)
 
 
-def test_chi_squared_multiple_categories():
+def test_chi_squared_multiple_categories() -> None:
     chi2 = stats.ChiSquared()
 
     data = [
@@ -79,14 +79,14 @@ def test_chi_squared_multiple_categories():
     assert chi2.degrees_of_freedom == 2
 
 
-def test_chi_squared_empty():
+def test_chi_squared_empty() -> None:
     chi2 = stats.ChiSquared()
     assert chi2.get() == 0.0
     assert chi2.degrees_of_freedom == 0
     assert chi2.p_value == 1.0
 
 
-def test_chi_squared_revert():
+def test_chi_squared_revert() -> None:
     chi2 = stats.ChiSquared()
     data = [
         ("A", 0),
@@ -129,7 +129,7 @@ def test_chi_squared_revert():
     assert len(chi2.counts) == 0
 
 
-def test_chi_squared_rolling():
+def test_chi_squared_rolling() -> None:
     chi2 = utils.Rolling(stats.ChiSquared, window_size=4)
     data = [
         ("A", 0),
@@ -159,7 +159,7 @@ def test_chi_squared_rolling():
     assert math.isclose(chi2.get(), 4.0)
 
 
-def test_chi_squared_scipy_comparison():
+def test_chi_squared_scipy_comparison() -> None:
     chi2 = stats.ChiSquared()
 
     random.seed(42)
@@ -179,7 +179,7 @@ def test_chi_squared_scipy_comparison():
     ]
 
     result = scipy.stats.chi2_contingency(contingency, correction=False)
-    scipy_chi2, scipy_p, scipy_df = float(result[0]), float(result[1]), int(result[2])  # type: ignore[arg-type]
+    scipy_chi2, scipy_p, scipy_df = float(result[0]), float(result[1]), int(result[2])
 
     assert math.isclose(chi2.get(), scipy_chi2)
     assert math.isclose(chi2.p_value, scipy_p)

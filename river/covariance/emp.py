@@ -222,7 +222,10 @@ class EmpiricalCovariance(SymmetricMatrix):
             except KeyError:
                 self._cov[i, j] = stats.Cov(self.ddof)
             if isinstance(cov, dict):
-                cov_ = cov.get((i, j), cov.get((j, i)))
+                try:
+                    cov_ = cov[i, j]
+                except KeyError:
+                    cov_ = cov[j, i]
             else:
                 cov_ = cov
             self._cov[i, j] += stats.Cov._from_state(

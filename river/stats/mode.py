@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import collections
-import numbers
-import typing
+from collections.abc import Hashable
+
+from typing_extensions import TypeVar
 
 from river import stats
 
 __all__ = ["Mode"]
 
+HashableT = TypeVar("HashableT", bound=Hashable, default=Hashable)
 
-class Mode(stats.base.Univariate):
+
+class Mode(stats.base.Univariate[HashableT, HashableT]):
     """Running mode.
 
     The mode is simply the most common value. An approximate mode can be computed by setting the
@@ -51,23 +54,25 @@ class Mode(stats.base.Univariate):
 
     """
 
-    def __init__(self, k=25):
+    def __init__(self, k: int = 25) -> None:
         self.k = k
-        self.counts = collections.defaultdict(int)
+        self.counts: collections.defaultdict[HashableT, int] = collections.defaultdict(int)
 
     @property
-    def name(self):
+    def name(self) -> str:
         return "mode"
 
-    def update(self, x):
+    def update(self, x: HashableT) -> None:
         if self.k == -1 or x in self.counts or len(self.counts) < self.k:
             self.counts[x] += 1
 
-    def get(self):
-        return max(self.counts, key=self.counts.get, default=None)
+    def get(self) -> HashableT:
+        if not self.counts:
+            raise stats.base.NotEnoughSamples(f"{self.name} hasn't seen any value")
+        return max(self.counts, key=self.counts.__getitem__)
 
 
-class RollingMode(stats.base.RollingUnivariate):
+class RollingMode(stats.base.RollingUnivariate[HashableT, HashableT]):
     """Running mode over a window.
 
     The mode is the most common value.
@@ -115,14 +120,15 @@ class RollingMode(stats.base.RollingUnivariate):
     """
 
     def __init__(self, window_size: int):
-        self.window: collections.deque[numbers.Number] = collections.deque(maxlen=window_size)
-        self.counts: collections.defaultdict[typing.Any, int] = collections.defaultdict(int)
+        self.window: collections.deque[HashableT] = collections.deque(maxlen=window_size)
+        self.counts: collections.defaultdict[HashableT, int] = collections.defaultdict(int)
 
     @property
-    def window_size(self):
+    def window_size(self) -> int:
+        assert self.window.maxlen is not None
         return self.window.maxlen
 
-    def update(self, x):
+    def update(self, x: HashableT) -> None:
         if len(self.window) >= self.window_size:
             # Subtract the counter of the last element
             first_in = self.window[0]
@@ -135,5 +141,7 @@ class RollingMode(stats.base.RollingUnivariate):
         self.counts[x] += 1
         self.window.append(x)
 
-    def get(self):
-        return max(self.counts, key=self.counts.get, default=None)
+    def get(self) -> HashableT:
+        if not self.counts:
+            raise stats.base.NotEnoughSamples(f"{self.name} hasn't seen any value")
+        return max(self.counts, key=self.counts.__getitem__)

@@ -275,12 +275,7 @@ class CluStreamMicroCluster:
 
     __slots__ = ("x", "w", "timestamp", "var_x", "var_time", "_center")
 
-    def __init__(
-        self,
-        x: dict = defaultdict(float),
-        w: float | None = None,
-        timestamp: int | None = None,
-    ):
+    def __init__(self, x: dict, w: float, timestamp: int):
         # Initialize with sample x
         self.x = x
         self.w = w

@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import math
 import random
+import typing
 
 import numpy as np
 import pytest
@@ -10,7 +11,7 @@ import pytest
 from river import stats
 
 
-def test_add_mean():
+def test_add_mean() -> None:
     A = stats.Mean()
     B = stats.Mean()
     C = stats.Mean()
@@ -38,13 +39,14 @@ def test_add_mean():
         )
 
 
-def _weighted_var(X, W, ddof):
-    average = np.average(X, weights=W)
-    return np.average((X - average) ** 2, weights=W) * len(X) / (len(X) - ddof)
+def _weighted_var(X: typing.Sequence[float], W: typing.Sequence[float], ddof: int) -> float:
+    X_arr = np.asarray(X)
+    average = np.average(X_arr, weights=W)
+    return float(np.average((X_arr - average) ** 2, weights=W) * len(X) / (len(X) - ddof))
 
 
 @pytest.mark.parametrize("ddof", [pytest.param(ddof, id=f"{ddof=}") for ddof in [0, 1, 2]])
-def test_add_var(ddof):
+def test_add_var(ddof: int) -> None:
     A = stats.Var(ddof)
     B = stats.Var(ddof)
     C = stats.Var(ddof)
@@ -79,7 +81,7 @@ def test_add_var(ddof):
         for stat in [stats.Mean(), stats.Var(ddof=0), stats.Var(ddof=1), stats.Var(ddof=2)]
     ],
 )
-def test_sub(stat):
+def test_sub(stat: typing.Any) -> None:
     A = copy.deepcopy(stat)
     B = copy.deepcopy(stat)
     C = copy.deepcopy(stat)
@@ -108,7 +110,7 @@ def test_sub(stat):
         for stat in [stats.Mean(), stats.Var(ddof=0), stats.Var(ddof=1), stats.Var(ddof=2)]
     ],
 )
-def test_sub_back_to_zero(stat):
+def test_sub_back_to_zero(stat: typing.Any) -> None:
     A = copy.deepcopy(stat)
     B = copy.deepcopy(stat)
     C = copy.deepcopy(stat)
@@ -125,7 +127,7 @@ def test_sub_back_to_zero(stat):
     "ddof",
     [pytest.param(ddof, id=f"{ddof=}") for ddof in [0, 1]],
 )
-def test_add_cov(ddof):
+def test_add_cov(ddof: int) -> None:
     c1 = stats.Cov(ddof=ddof)
     c2 = stats.Cov(ddof=ddof)
 
@@ -163,7 +165,7 @@ def test_add_cov(ddof):
     "ddof",
     [pytest.param(ddof, id=f"{ddof=}") for ddof in [0, 1]],
 )
-def test_sub_cov(ddof):
+def test_sub_cov(ddof: int) -> None:
     c1 = stats.Cov(ddof=ddof)
     c2 = stats.Cov(ddof=ddof)
 

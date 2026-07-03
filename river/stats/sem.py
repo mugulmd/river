@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import math
+
+from river import stats
+
 from . import var
 
 
@@ -56,8 +60,7 @@ class SEM(var.Var):
 
     """
 
-    def get(self):
-        try:
-            return (super().get() / self.mean.n) ** 0.5
-        except ZeroDivisionError:
-            return None
+    def get(self) -> float:
+        if self.mean.n == 0:
+            raise stats.base.NotEnoughSamples(f"{self.name} hasn't seen any value")
+        return math.sqrt(super().get() / self.mean.n)

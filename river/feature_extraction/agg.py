@@ -11,6 +11,13 @@ if typing.TYPE_CHECKING:
     import pandas as pd
 
 
+def _get_or_none(stat):
+    try:
+        return stat.get()
+    except stats.base.NotEnoughSamples:
+        return None
+
+
 class Agg(base.Transformer):
     """Computes a streaming aggregate.
 
@@ -197,14 +204,14 @@ class Agg(base.Transformer):
             self._groups[key].update(x[self.on])
 
     def transform_one(self, x):
-        return {self._feature_name: self._groups[self._make_key(x)].get()}
+        return {self._feature_name: _get_or_none(self._groups[self._make_key(x)])}
 
     @property
     def state(self) -> pd.Series:
         """Return the current values for each group as a series."""
         pd = utils.pandas.import_pandas()
         return pd.Series(
-            (stat.get() for stat in self._groups.values()),
+            (_get_or_none(stat) for stat in self._groups.values()),
             index=(
                 pd.Index(key[0] for key in self._groups.keys())
                 if self.by and len(self.by) == 1

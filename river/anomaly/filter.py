@@ -174,7 +174,13 @@ class QuantileFilter(anomaly.base.AnomalyFilter):
         return self.quantile.q
 
     def classify(self, score):
-        return score >= (self.quantile.get() or math.inf)
+        try:
+            # A zero quantile is treated like an absent one, so that the filter lets
+            # everything through until the anomaly detector produces non-zero scores.
+            threshold = self.quantile.get() or math.inf
+        except stats.base.NotEnoughSamples:
+            return False
+        return score >= threshold
 
     def learn_one(self, *args, **learn_kwargs):
         score = self.score_one(*args)

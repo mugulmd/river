@@ -31,6 +31,24 @@ CONFIGS: list[dict[str, typing.Any]] = [
     {"categories": {"c1": {"a", "b"}, "c2": {"c", "d"}}, "drop_zeros": True, "drop_first": True},
 ]
 
+
+def _config_id(config: dict[str, typing.Any]) -> str:
+    """A deterministic parametrize id for a config that may contain sets.
+
+    `ids=str` is not enough: set reprs depend on the hash seed, which differs between
+    pytest-xdist workers and makes them abort with a collection mismatch.
+    """
+
+    def normalize(value: typing.Any) -> typing.Any:
+        if isinstance(value, set):
+            return sorted(value)
+        if isinstance(value, dict):
+            return {key: normalize(inner) for key, inner in value.items()}
+        return value
+
+    return str(normalize(config))
+
+
 # Backends whose dtypes round-trip the input unchanged, so their encoded output must equal the
 # pandas `get_dummies` reference exactly (including missing values). The `pandas[nullable]` /
 # `pandas[pyarrow]` variants are excluded on purpose: `convert_dtypes` re-represents the data
@@ -78,7 +96,7 @@ def _assert_pandas_parity(
     return got
 
 
-@pytest.mark.parametrize("config", CONFIGS, ids=str)
+@pytest.mark.parametrize("config", CONFIGS, ids=_config_id)
 def test_transform_many_is_backend_agnostic(
     frame_backend: FrameBackend, config: dict[str, typing.Any]
 ) -> None:
@@ -99,7 +117,7 @@ def test_transform_many_is_backend_agnostic(
         {"categories": {"c1": {"a", "b"}, "c2": {"c", "d"}}},
         {"categories": {"c1": {"a", "b"}, "c2": {"c", "d"}}, "drop_first": True},
     ],
-    ids=str,
+    ids=_config_id,
 )
 def test_transform_many_matches_transform_one(
     frame_backend: FrameBackend, config: dict[str, typing.Any]
@@ -225,7 +243,7 @@ def test_transform_many_preserves_pandas_index() -> None:
         {"categories": {"c1": {"z"}}, "drop_zeros": True},  # no configured category is present
         {"drop_zeros": True, "drop_first": True},  # the lone dummy is dropped as the "first"
     ],
-    ids=str,
+    ids=_config_id,
 )
 def test_transform_many_empty_result_has_no_columns(
     frame_backend: FrameBackend, config: dict[str, typing.Any]

@@ -140,7 +140,7 @@ class BayesianLinearRegression(base.MiniBatchRegressor):
 
     """
 
-    def __init__(self, alpha=1, beta=1, smoothing: float | None = None):
+    def __init__(self, alpha: float = 1, beta: float = 1, smoothing: float | None = None) -> None:
         self.alpha = alpha
         self.beta = beta
         self.smoothing = smoothing
@@ -162,9 +162,9 @@ class BayesianLinearRegression(base.MiniBatchRegressor):
         self._ss_inv_arr = np.zeros((0, 0), dtype=np.float64, order="F")
         self._eta_arr = np.zeros(0, dtype=np.float64)
         self._m_arr = np.zeros(0, dtype=np.float64)
-        self._m_dirty = False
-        self._cap = 0
-        self._n = 1
+        self._m_dirty: bool = False
+        self._cap: int = 0
+        self._n: int = 1
 
     def _grow(self, needed: int) -> None:
         new_cap = max(needed, max(8, self._cap * 2))
@@ -181,7 +181,7 @@ class BayesianLinearRegression(base.MiniBatchRegressor):
         self._eta_arr = new_eta
         self._cap = new_cap
 
-    def _ensure_features(self, features) -> None:
+    def _ensure_features(self, features: typing.Iterable[typing.Any]) -> None:
         idx = self._idx
         for f in features:
             if f not in idx:
@@ -196,7 +196,9 @@ class BayesianLinearRegression(base.MiniBatchRegressor):
             self._m_arr = self._ss_inv_arr @ self._eta_arr
         self._m_dirty = False
 
-    def learn_one(self, x, y):
+    def learn_one(
+        self, x: dict[base.typing.FeatureName, typing.Any], y: base.typing.RegTarget
+    ) -> None:
         # Treat features absent from `x` as observed values of 0. Updating the
         # full-cap state (rather than just the touched submatrix via np.ix_)
         # keeps `_ss_inv_arr = inv(_ss_arr)` consistent across
@@ -266,7 +268,9 @@ class BayesianLinearRegression(base.MiniBatchRegressor):
             self._ss_inv_arr[:n, :n] = np.linalg.inv(self._ss_arr[:n, :n])
         self._m_dirty = True
 
-    def predict_one(self, x, with_dist=False):
+    def predict_one(
+        self, x: dict[base.typing.FeatureName, typing.Any], with_dist: bool = False
+    ) -> base.typing.RegTarget:
         """Predict the output of features `x`.
 
         Parameters
@@ -312,7 +316,7 @@ class BayesianLinearRegression(base.MiniBatchRegressor):
             y_pred_var = 1 / self.beta
         y_pred_var += diag * unknown_norm_sq
 
-        return proba.Gaussian._from_state(n=1, m=y_pred_mean, var=y_pred_var, ddof=0)
+        return proba.Gaussian._from_state(n=1, m=y_pred_mean, var=y_pred_var, ddof=0)  # type: ignore[return-value]
 
     def predict_many(self, X: IntoDataFrame) -> IntoSeries:
         X = utils.dataframe.into_frame(X)

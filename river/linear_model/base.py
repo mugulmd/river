@@ -66,7 +66,7 @@ class GLM:
         self.intercept = intercept_init
         self.intercept_lr = (
             optim.schedulers.Constant(intercept_lr)
-            if isinstance(intercept_lr, float)
+            if isinstance(intercept_lr, (int, float))
             else intercept_lr
         )
         self.clip_gradient = clip_gradient

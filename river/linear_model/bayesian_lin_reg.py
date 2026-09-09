@@ -268,9 +268,7 @@ class BayesianLinearRegression(base.MiniBatchRegressor):
             self._ss_inv_arr[:n, :n] = np.linalg.inv(self._ss_arr[:n, :n])
         self._m_dirty = True
 
-    def predict_one(
-        self, x: dict[base.typing.FeatureName, typing.Any]
-    ) -> base.typing.RegTarget:
+    def predict_one(self, x: dict[base.typing.FeatureName, typing.Any]) -> base.typing.RegTarget:
         """Predict the output of features `x`.
 
         Parameters

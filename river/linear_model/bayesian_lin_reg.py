@@ -51,7 +51,7 @@ class BayesianLinearRegression(base.MiniBatchRegressor):
     >>> model.predict_one(x)
     43.855...
 
-    >>> model.predict_one(x, with_dist=True)
+    >>> model.predict_dist_one(x)
     𝒩(μ=43.85..., σ=1.00...)
 
     The `smoothing` parameter can be set to make the model robust to drift. The parameter is
@@ -263,7 +263,7 @@ class BayesianLinearRegression(base.MiniBatchRegressor):
 
         # `learn_one` keeps `_ss_inv_arr = inv(_ss_arr)` (via Sherman-Morrison without smoothing,
         # a full inverse with it). Refresh the active block in one inverse so subsequent
-        # `learn_one` updates and `predict_one(..., with_dist=True)` see a consistent covariance.
+        # `learn_one` updates and `predict_dist_one(...)` see a consistent covariance.
         if n:
             self._ss_inv_arr[:n, :n] = np.linalg.inv(self._ss_arr[:n, :n])
         self._m_dirty = True

@@ -269,7 +269,7 @@ class BayesianLinearRegression(base.MiniBatchRegressor):
         self._m_dirty = True
 
     def predict_one(
-        self, x: dict[base.typing.FeatureName, typing.Any], with_dist: bool = False
+        self, x: dict[base.typing.FeatureName, typing.Any]
     ) -> base.typing.RegTarget:
         """Predict the output of features `x`.
 
@@ -277,8 +277,6 @@ class BayesianLinearRegression(base.MiniBatchRegressor):
         ----------
         x
             A dictionary of features.
-        with_dist
-            Whether to return a predictive distribution, or instead just the most likely value.
 
         Returns
         -------
@@ -296,8 +294,10 @@ class BayesianLinearRegression(base.MiniBatchRegressor):
                 if i is not None:
                     y_pred_mean += m_arr[i] * v
 
-        if not with_dist:
-            return float(y_pred_mean)
+        return float(y_pred_mean)
+
+    def predict_dist_one(self, x: dict[base.typing.FeatureName, typing.Any]) -> proba.Gaussian:
+        y_pred_mean = self.predict_one(x)
 
         n = len(self._idx)
         diag = 1.0 / self.alpha
@@ -316,7 +316,7 @@ class BayesianLinearRegression(base.MiniBatchRegressor):
             y_pred_var = 1 / self.beta
         y_pred_var += diag * unknown_norm_sq
 
-        return proba.Gaussian._from_state(n=1, m=y_pred_mean, var=y_pred_var, ddof=0)  # type: ignore[return-value]
+        return proba.Gaussian._from_state(n=1, m=y_pred_mean, var=y_pred_var, ddof=0)
 
     def predict_many(self, X: IntoDataFrame) -> IntoSeries:
         X = utils.dataframe.into_frame(X)

@@ -1008,6 +1008,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#naive_bayes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        naive_bayes
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#stream" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1023,6 +1034,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         preprocessing
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        cluster
       </span>
     </span>
   </a>
@@ -2280,6 +2302,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#naive_bayes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        naive_bayes
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#stream" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2295,6 +2328,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         preprocessing
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        cluster
       </span>
     </span>
   </a>
@@ -2330,6 +2374,10 @@
 <ul>
 <li><code>BayesianLinearRegression.predict_dist_one</code> now replaces <code>BayesianLinearRegression.predict_one(..., with_dist=True)</code> to better respect the <code>Regressor</code> interface while still being able to predict distributions.</li>
 </ul>
+<h2 id="naive_bayes_1">naive_bayes<a class="headerlink" href="#naive_bayes_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>MultinomialNB.learn_many</code>, <code>predict_many</code>, and <code>predict_proba_many</code> now accept any <a href="https://github.com/narwhals-dev/narwhals">narwhals</a>-supported eager backend (pandas, polars, pyarrow, ...) instead of being pandas-only, preserving the input backend (including the pandas index) on output. A backend-agnostic <code>BaseNB.predict_many</code> was added so the argmax-over-probabilities logic is shared by all Naive Bayes variants.</li>
+</ul>
 <h2 id="stream">stream<a class="headerlink" href="#stream" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../../api/stream/Cache"><code>stream.Cache</code></a> now writes a pass to a temporary file and renames it into place once the stream is exhausted. An interrupted first pass (a <code>break</code>, an exception, an abandoned generator) used to leave a truncated file behind, which every later pass then read back as if it were the whole dataset.</li>
@@ -2341,6 +2389,12 @@
 <h2 id="preprocessing">preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../../api/preprocessing/Normalizer"><code>preprocessing.Normalizer</code></a> now handles zero vectors without raising a <code>ZeroDivisionError</code>. A zero vector is returned unchanged instead.</li>
+</ul>
+<h2 id="cluster">cluster<a class="headerlink" href="#cluster" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Fixed the radius of <a href="../../api/cluster/DenStream"><code>cluster.DenStream</code></a> micro-clusters, which used the norm of the vector of squared sums instead of the sum of its components and was 0 away from the origin. The docstring example now uses <code>epsilon=1.0</code>.</li>
+<li><code>cluster.DenStream.predict_one</code> now expands a cluster past the direct neighbors of its first micro-cluster. The neighbors of a neighbor were only queued if they already had a label, so a chain of micro-clusters came out as several clusters.</li>
+<li>New <a href="../../api/cluster/DenStream"><code>cluster.DenStream</code></a> micro-clusters no longer reuse the key of a deleted one, which overwrote an existing micro-cluster.</li>
 </ul>
 
 
